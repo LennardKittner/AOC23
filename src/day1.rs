@@ -1,7 +1,7 @@
 use core::num;
 use std::i32;
 
-pub fn exec_day1_part1(input: &str) {
+pub fn exec_day1_part1(input: &str) -> String {
     let lines: Vec<&str> = input.lines().collect();
     let mut result: u64 = 0;
     for line in lines {
@@ -13,10 +13,10 @@ pub fn exec_day1_part1(input: &str) {
         }
         result += (nums.first().unwrap_or(&0) * 10 + nums.last().unwrap_or(&0)) as u64;
     }
-    println!("{result}");
+    return result.to_string();
 }
 
-pub fn exec_day1_part2(input: &str) {
+pub fn exec_day1_part2(input: &str) -> String {
     let input = input.replace("one", "one1one")
         .replace("two", "two2two")
         .replace("three", "three3three")
@@ -37,5 +37,5 @@ pub fn exec_day1_part2(input: &str) {
         }
         result += (nums.first().unwrap_or(&0) * 10 + nums.last().unwrap_or(&0)) as u64;
     }
-    println!("{result}");
+    return result.to_string();
 }
