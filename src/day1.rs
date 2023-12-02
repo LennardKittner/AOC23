@@ -1,6 +1,3 @@
-use core::num;
-use std::i32;
-
 pub fn exec_day1_part1(input: &str) -> String {
     let lines: Vec<&str> = input.lines().collect();
     let mut result: u64 = 0;

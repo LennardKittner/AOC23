@@ -1,6 +1,6 @@
 use std::{env, num::ParseIntError};
 
-use AOC23::run;
+use aoc23::run;
 
 fn main() {
     let args :Vec<Result<i32, ParseIntError>> = env::args().map(|s| s.parse::<i32>()).collect();
