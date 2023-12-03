@@ -9,7 +9,7 @@ fn main() {
         None => -1,
     };
     if task < 0 {
-        println!("please enter the day you want to run as an int from 1 to 24");
+        println!("please enter the day you want to run as an int from 1 to 25");
         return;
     }
     run(task);
