@@ -3,10 +3,12 @@ use std::{fs, i32, time::Instant};
 use day1::{exec_day1_part2, exec_day1_part1};
 use day2::{exec_day2_part2, exec_day2_part1};
 use day3::{exec_day3_part2, exec_day3_part1};
+use day4::{exec_day4_part2, exec_day4_part1};
 
 mod day1;
 mod day2;
 mod day3;
+mod day4;
 
 fn exec(fun: impl Fn(&str) -> String, input: &str) {
     let start_time = Instant::now();
@@ -33,6 +35,10 @@ pub fn run(day: i32) {
         3 => {
             exec(exec_day3_part1, &input);
             exec(exec_day3_part2, &input);
+        },
+        4 => {
+            exec(exec_day4_part1, &input);
+            exec(exec_day4_part2, &input);
         },
         _ => (),
     }
