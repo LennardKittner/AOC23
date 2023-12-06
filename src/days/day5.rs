@@ -75,6 +75,36 @@ struct Seed {
     len: u64,
 }
 
+// impl Seed {
+//     fn end(&self) -> u64 {
+//       self.start + self.len-1  
+//     }
+// }
+
+// impl Entry {
+//     fn end_src(&self) -> u64 {
+//       self.src + self.len-1  
+//     }
+// }
+
+// fn left(a1: u64, a2: u64, b1: u64, _: u64) -> Option<(u64, u64)> {
+//     if a1 >= b1 {
+//         return None;
+//     }
+//     if a2 <= b1 {
+//         return None;
+//     }
+//     Some((a1, b1))
+// }
+
+// fn center() {
+
+// }
+
+// fn right(a1: u64, a2: u64, b1: u64, b2: u64) -> Option<(u64, u64)> {
+//     todo!()
+// }
+
 fn lookup2(seeds: &mut Vec<Seed>, dict: &Vec<Entry>) -> Vec<Seed>{
     let mut result: Vec<Seed> = Vec::new();
     let mut i = 0;
@@ -82,24 +112,71 @@ fn lookup2(seeds: &mut Vec<Seed>, dict: &Vec<Entry>) -> Vec<Seed>{
         let seed = seeds[i].clone();
         let mut found = false;
         for entry in dict {
-            if entry.src <= seed.start && seed.start < entry.src + entry.len {
-                let offset = seed.start - entry.src;
-                if entry.len >= seed.len { 
-                    result.push(Seed { start: entry.target + offset, len: seed.len });
-                    println!("UPDATED SEED 1 {:?} FROM {:?} WITH {:?}",Seed { start: entry.target + offset, len: entry.len }, seed, entry);
-                } else {
-                    result.push(Seed { start: entry.target + offset, len: entry.len });
-                    println!("UPDATED SEED 2 {:?} FROM {:?} WITH {:?}",Seed { start: entry.target + offset, len: entry.len }, seed, entry);
-                    seeds.push(Seed { start: seed.start + entry.len, len: seed.len - entry.len });
-                    println!("NEW SEED {:?} FROM {:?}",Seed { start: seed.start + entry.len, len: seed.len - entry.len }, seed);
-                }
+            let mut seed1 = None;
+            let mut seed2 = None;
+            let mut seed3 = None;
+            if seed.start < entry.src && seed.start + seed.len > entry.src {
+                seed1 = Some(Seed { start: seed.start, len: entry.src - seed.start});
                 found = true;
+            }
+            if seed.start < entry.src + entry.len && seed.start + seed.len >= entry.src + entry.len {
+                seed3 = Some(Seed { start: entry.src + entry.len, len: seed.start + seed.len - (entry.src + entry.len)});
+                found = true;
+            }
+            if seed.start <= entry.src && seed.start + seed.len > entry.src || seed.start < entry.src + entry.len && seed.start + seed.len > entry.src + entry.len {
+                let len = if seed3.is_none() && seed1.is_none() {
+                    seed.len
+                } else if seed3.is_none() && seed1.is_some() {
+                    seed.len - (entry.src - seed.start)
+                } else if seed3.is_some() && seed1.is_none() {
+                    entry.len - (seed.start - entry.src)
+                } else {
+                    seed.len - (entry.src - seed.start) - (seed.start + seed.len - (entry.src + entry.len))
+                };
+                let offset = seed.start - entry.src;
+                seed2 = Some(Seed { start: entry.target + offset, len: len});
+                found = true;
+            }
+            if found {
+                println!("Seed {:?} entry {:?} seed1 {:?} seed2 {:?} seed3 {:?}", seed, entry, seed1, seed2, seed3);
+            }
+            if let Some(s) = seed1 {
+                seeds.push(s);
+            }
+            if let Some(s) = seed2 {
+                result.push(s);
+            }
+            if let Some(s) = seed3 {
+                seeds.push(s);
+            }
+            if found {
                 break;
             }
+
+            // if seed.start < entry.src && seed.start + seed.len > entry.src {
+            //     seeds.push(Seed { start: seed.start, len: entry.src - seed.start });
+            //     if seed.start + seed.len <= entry.src + entry.len { 
+            //         result.push(Seed { start: entry.target, len: seed.len - (entry.src - seed.start) });
+            //     } else {
+            //         result.push(Seed { start: entry.target, len: entry.len });
+            //         seeds.push(Seed { start: entry.src + entry.len, len: seed.len - entry.len });
+            //     }
+            //     found = true;
+            //     break;
+            // } else if entry.src <= seed.start && seed.start < entry.src + entry.len {
+            //     let offset = seed.start - entry.src;
+            //     if entry.len >= seed.len { 
+            //         result.push(Seed { start: entry.target + offset, len: seed.len });
+            //     } else {
+            //         result.push(Seed { start: entry.target + offset, len: entry.len });
+            //         seeds.push(Seed { start: seed.start + entry.len, len: seed.len - entry.len });
+            //     }
+            //     found = true;
+            //     break;
+            // }
         }
         if !found {
             result.push(Seed { start: seed.start, len: seed.len });
-            println!("NEW SEED {:?} NO MATCH", seed)
         }
         i += 1;
     }
@@ -129,20 +206,19 @@ pub fn exec_day5_part2(input: &str) -> String {
         seeds.push(Seed { start: seeds_values[i], len: seeds_values[i+1] });
     }
 
-    println!("SEEDS: {:?}", seeds);
     let mut tmp = lookup2(&mut seeds, &dict_s_s);
-    println!("TMP: {:?}", tmp);
+    println!("1");
     let mut tmp = lookup2(&mut tmp, &dict_s_f);
-    println!("TMP: {:?}", tmp);
+    println!("2");
     let mut tmp = lookup2(&mut tmp, &dict_f_w);
-    println!("TMP: {:?}", tmp);
+    println!("3");
     let mut tmp = lookup2(&mut tmp, &dict_w_l);
-    println!("TMP: {:?}", tmp);
+    println!("4");
     let mut tmp = lookup2(&mut tmp, &dict_l_t);
-    println!("TMP: {:?}", tmp);
+    println!("5");
     let mut tmp = lookup2(&mut tmp, &dict_t_h);
-    println!("TMP: {:?}", tmp);
+    println!("6");
     let result = lookup2(&mut tmp, &dict_h_l);
-    println!("RESULT: {:?}", result);
+    println!("7");
     result.iter().map(|s| s.start).min().unwrap().to_string()
 }

@@ -7,6 +7,7 @@ mod day4;
 mod day1;
 mod day2;
 mod day5;
+mod day6;
 
 
 pub fn run(day: i32) {
@@ -35,6 +36,10 @@ pub fn run(day: i32) {
         5 => {
             exec(day5::exec_day5_part1, &input);
             exec(day5::exec_day5_part2, &input);
+        },
+        6 => {
+            exec(day6::exec_day6_part1, &input);
+            exec(day6::exec_day6_part2, &input);
         },
         _ => (),
     }
