@@ -4,13 +4,13 @@ pub fn exec_day1_part1(input: &str) -> String {
     for line in lines {
         let mut nums = Vec::new();
         for c in line.bytes() {
-            if c >= 48 && c <= 57 {
+            if (48..=57).contains(&c) {
                 nums.push(c-48);
             }
         }
         result += (nums.first().unwrap_or(&0) * 10 + nums.last().unwrap_or(&0)) as u64;
     }
-    return result.to_string();
+    result.to_string()
 }
 
 pub fn exec_day1_part2(input: &str) -> String {
@@ -28,11 +28,11 @@ pub fn exec_day1_part2(input: &str) -> String {
     for line in lines {
         let mut nums = Vec::new();
         for c in line.bytes() {
-            if c >= 48 && c <= 57 {
+            if (48..=57).contains(&c) {
                 nums.push(c-48);
             }
         }
         result += (nums.first().unwrap_or(&0) * 10 + nums.last().unwrap_or(&0)) as u64;
     }
-    return result.to_string();
+    result.to_string()
 }

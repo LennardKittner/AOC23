@@ -3,7 +3,7 @@ pub fn exec_day4_part1(input: &str) -> String {
     let cards: Vec<Vec<Vec<u32>>> = input.replace("  ", " ").lines()
     .map(|l| l.split(": ").last().unwrap()
         .split(" | ")
-        .map(|c| c.split(" ")
+        .map(|c| c.split(' ')
             .map(|n| n.parse::<u32>().unwrap()).collect()).collect()).collect();
     let mut result = 0;
     for card in cards {
@@ -24,7 +24,7 @@ pub fn exec_day4_part2(input: &str) -> String {
     let mut cards: Vec<(i32, Vec<Vec<u32>>)> = input.replace("  ", " ").lines()
     .map(|l| l.split(": ").last().unwrap()
         .split(" | ")
-        .map(|c| c.split(" ")
+        .map(|c| c.split(' ')
             .map(|n| n.parse::<u32>().unwrap()).collect()).collect())
         .map(|c| (1, c)).collect();
     for i in 0..cards.len() {

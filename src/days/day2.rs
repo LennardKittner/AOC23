@@ -34,7 +34,7 @@ pub fn exec_day2_part1(input: &str) -> String {
             result += id;
         }
     }
-    return format!("{result}");
+   result.to_string()
 }
 
 pub fn exec_day2_part2(input: &str) -> String {
@@ -65,5 +65,5 @@ pub fn exec_day2_part2(input: &str) -> String {
         }
         result += max_red * max_green * max_blue;
     }
-    return format!("{result}");
+    result.to_string()
 }

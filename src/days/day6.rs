@@ -1,5 +1,5 @@
 fn ints(string: &str) -> Vec<u64> {
-    string.split(" ").filter_map(|s| s.parse::<u64>().ok()).collect()
+    string.split(' ').filter_map(|s| s.parse::<u64>().ok()).collect()
 }
 
 pub fn exec_day6_part1(input: &str) -> String {

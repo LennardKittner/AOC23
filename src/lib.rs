@@ -1,4 +1,4 @@
-use std::{fs::{self, File}, i32, time::Instant, io::Write};
+use std::{fmt::Write, fs::{self, File}, i32, time::Instant, io::Write as IOWrite};
 
 use indoc::formatdoc;
 
@@ -16,19 +16,18 @@ fn generate_mod_string(days: &Vec<i32>) -> String {
     for i in days {
         result += format!("mod day{i};\n").as_str();
     }
-    return result;
+    result
 }
 
-fn generate_math_branches(days: &Vec<i32>) -> String {
-    let mut result: String = String::new();
-    for i in days {
-        result += format!(r#"
-        {i} => {{
-            exec(day{i}::exec_day{i}_part1, &input);
-            exec(day{i}::exec_day{i}_part2, &input);
-        }},"#).as_str();
-    }
-    return result;
+fn generate_match_branches(days: &[i32]) -> String {
+    days.iter()
+        .fold(String::new(), |mut result, d| { write!(&mut result, r#"
+        {d} => {{
+            exec(day{d}::exec_day{d}_part1, &input);
+            exec(day{d}::exec_day{d}_part2, &input);
+        }},"#).unwrap();
+            result
+        })
 }
 
 pub fn generate(day: i32) {
@@ -46,7 +45,7 @@ pub fn generate(day: i32) {
         println!("skipping code generation of {src_file_path} already exists");
     } else {
         let mut new_day = File::create(&src_file_path).expect("Failed to generate source.");
-        let _ = new_day.write_all(formatdoc!{
+        new_day.write_all(formatdoc!{
             r#"
             pub fn exec_day{day}_part1(input: &str) -> String {{
                 todo!("{{input}}")
@@ -56,10 +55,10 @@ pub fn generate(day: i32) {
                 todo!("{{input}}")
             }}
             "#
-        }.as_bytes()).expect(format!("Failed to write {src_file_path}.").as_str());
+        }.as_bytes()).unwrap_or_else(|_| panic!("Failed to write {src_file_path}."));
     }
-    let mut new_mod = File::create(mod_path).expect(format!("Failed to generate {mod_path}.").as_str());
-    let _ = new_mod.write_all( formatdoc!{
+    let mut new_mod = File::create(mod_path).unwrap_or_else(|_| panic!("Failed to generate {mod_path}."));
+    new_mod.write_all( formatdoc!{
         r#"
         use std::{{fs, i32}};
 
@@ -77,8 +76,8 @@ pub fn generate(day: i32) {
                 _ => (),
             }}
         }}
-        "#, generate_mod_string(&days), generate_math_branches(&days)
-    }.as_bytes()).expect(format!("Failed to write {mod_path}.").as_str());
+        "#, generate_mod_string(&days), generate_match_branches(&days)
+    }.as_bytes()).unwrap_or_else(|_| panic!("Failed to write {mod_path}."));
 }
 
 pub fn run(day: i32) {

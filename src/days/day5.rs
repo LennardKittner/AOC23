@@ -1,6 +1,6 @@
 
 fn ints(string: &str) -> Vec<u64> {
-    string.split(" ").filter_map(|s| s.parse::<u64>().ok()).collect()
+    string.split(' ').filter_map(|s| s.parse::<u64>().ok()).collect()
 }
 
 #[derive(Debug)]
@@ -10,10 +10,10 @@ struct Entry {
     len: u64,
 }
 
-fn make_dict(input: &Vec<&str>, index: usize) -> Vec<Entry> {
+fn make_dict(input: &[&str], index: usize) -> Vec<Entry> {
     let mut dict: Vec<Entry> = Vec::new();
-    for i in (index+1)..input.len() {
-        let nums = ints(input[i]);
+    for item in input.iter().skip(index+1) {
+        let nums = ints(item);
         if nums.is_empty() {
             break;
         }
@@ -22,7 +22,7 @@ fn make_dict(input: &Vec<&str>, index: usize) -> Vec<Entry> {
     dict
 }
 
-fn lookup(seeds: &Vec<u64>, dict: &Vec<Entry>) -> Vec<u64>{
+fn lookup(seeds: &[u64], dict: &Vec<Entry>) -> Vec<u64>{
     let mut result = Vec::new();
     for seed in seeds {
         let mut found = false;
@@ -134,7 +134,7 @@ fn lookup2(seeds: &mut Vec<Seed>, dict: &Vec<Entry>) -> Vec<Seed>{
                     seed.len - (entry.src - seed.start) - (seed.start + seed.len - (entry.src + entry.len))
                 };
                 let offset = seed.start - entry.src;
-                seed2 = Some(Seed { start: entry.target + offset, len: len});
+                seed2 = Some(Seed { start: entry.target + offset, len });
                 found = true;
             }
             if found {

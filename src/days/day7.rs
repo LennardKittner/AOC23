@@ -9,13 +9,13 @@ struct Entry {
 fn value(entry: &Entry) -> i32 {
     let mut encounters: HashMap<i32, i32>  = HashMap::new();
     for card in &entry.hand {
-        if encounters.contains_key(&card) {
-            *encounters.get_mut(&card).unwrap() += 1;
+        if encounters.contains_key(card) {
+            *encounters.get_mut(card).unwrap() += 1;
         } else {
             encounters.insert(*card, 1);
         }
     }
-    let max = encounters.iter().map(|(_, v)| v).max().unwrap();
+    let max = encounters.values().max().unwrap();
     if *max == 5 {
         return 7;
     }
@@ -41,16 +41,15 @@ fn value(entry: &Entry) -> i32 {
     if pairs == 1 {
         return 2;
     }
-    return 1;
+    1
 }
 
 fn compare(entry1: &Entry, entry2: &Entry, value: fn(&Entry) -> i32) -> Ordering {
-    let val1 = value(&entry1);
-    let val2 = value(&entry2);
-    if val1 > val2 {
-        return Ordering::Greater;
-    } else if val1 < val2 {
-        return Ordering::Less;
+    let val1 = value(entry1);
+    let val2 = value(entry2);
+    match val1.cmp(&val2) {
+        Ordering::Equal => (),
+        o => return o,
     }
     let mut entry1_won = true;
     for i in 0..entry1.hand.len() {
@@ -62,7 +61,7 @@ fn compare(entry1: &Entry, entry2: &Entry, value: fn(&Entry) -> i32) -> Ordering
             break;
         }
     }
-    return if entry1_won { Ordering::Greater } else { Ordering::Less };
+    if entry1_won { Ordering::Greater } else { Ordering::Less }
 }
 
 pub fn exec_day7_part1(input: &str) -> String {
@@ -81,7 +80,7 @@ pub fn exec_day7_part1(input: &str) -> String {
     map.insert('3', 3);
     map.insert('2', 2);
     let mut entries: Vec<Entry> = input.lines().map(|l| {
-        let parts: Vec<&str> = l.split(" ").collect();
+        let parts: Vec<&str> = l.split(' ').collect();
         Entry {
             hand: parts[0].chars().map(|c| map[&c]).collect::<Vec<i32>>(),
             bid: parts[1].parse().unwrap(),
@@ -107,7 +106,7 @@ pub fn exec_day7_part2(input: &str) -> String {
     map.insert('2', 2);
     map.insert('J', 1);
     let mut entries: Vec<Entry> = input.lines().map(|l| {
-        let parts: Vec<&str> = l.split(" ").collect();
+        let parts: Vec<&str> = l.split(' ').collect();
         Entry {
             hand: parts[0].chars().map(|c| map[&c]).collect::<Vec<i32>>(),
             bid: parts[1].parse().unwrap(),
@@ -122,8 +121,8 @@ pub fn exec_day7_part2(input: &str) -> String {
 fn value2(entry: &Entry) -> i32 {
     let mut encounters: HashMap<i32, i32>  = HashMap::new();
     for card in &entry.hand {
-        if encounters.contains_key(&card) {
-            *encounters.get_mut(&card).unwrap() += 1;
+        if encounters.contains_key(card) {
+            *encounters.get_mut(card).unwrap() += 1;
         } else {
             encounters.insert(*card, 1);
         }
@@ -137,7 +136,6 @@ fn value2(entry: &Entry) -> i32 {
         return 7;
     }
 
-    let max = encounters.values().max().unwrap();
     let mut max = 0;
     let mut max_key = 0;
     for (k, v) in &encounters {
@@ -176,5 +174,5 @@ fn value2(entry: &Entry) -> i32 {
     if max == 2 {
         return 2;
     }
-    return 1;
+    1
 }
