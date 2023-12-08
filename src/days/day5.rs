@@ -1,13 +1,13 @@
+use std::ops::Range;
 
-fn ints(string: &str) -> Vec<u64> {
-    string.split(' ').filter_map(|s| s.parse::<u64>().ok()).collect()
+fn ints(string: &str) -> Vec<i64> {
+    string.split(' ').filter_map(|s| s.parse::<i64>().ok()).collect()
 }
 
 #[derive(Debug)]
 struct Entry {
-    src: u64,
-    target: u64,
-    len: u64,
+    src: Range<i64>,
+    shift: i64,
 }
 
 fn make_dict(input: &[&str], index: usize) -> Vec<Entry> {
@@ -17,19 +17,18 @@ fn make_dict(input: &[&str], index: usize) -> Vec<Entry> {
         if nums.is_empty() {
             break;
         }
-        dict.push(Entry{src: nums[1], target: nums[0], len: nums[2]})
+        dict.push(Entry{src: nums[1]..nums[1]+nums[2], shift: nums[0] as i64 - nums[1] as i64})
     }
     dict
 }
 
-fn lookup(seeds: &[u64], dict: &Vec<Entry>) -> Vec<u64>{
+fn lookup(seeds: &[i64], dict: &Vec<Entry>) -> Vec<i64>{
     let mut result = Vec::new();
     for seed in seeds {
         let mut found = false;
         for entry in dict {
-            if entry.src <= *seed && *seed < entry.src + entry.len {
-                let offset = seed - entry.src;
-                result.push(entry.target + offset);
+            if entry.src.contains(seed) {
+                result.push(seed + entry.shift);
                 found = true;
                 break;
             }
@@ -71,39 +70,36 @@ pub fn exec_day5_part1(input: &str) -> String {
 
 #[derive(Debug, Clone)]
 struct Seed {
-    start: u64,
-    len: u64,
+    range: Range<i64>,
 }
 
-// impl Seed {
-//     fn end(&self) -> u64 {
-//       self.start + self.len-1  
-//     }
-// }
+impl Seed {
+    fn get_left(&self, entry: &Entry) -> Option<Seed> {
+        if self.range.start < entry.src.start && self.range.end > entry.src.start {
+            Some(Seed {range: self.range.start..entry.src.start})
+        } else {
+            None
+        }
+    }
 
-// impl Entry {
-//     fn end_src(&self) -> u64 {
-//       self.src + self.len-1  
-//     }
-// }
+    fn get_middle(&self, entry: &Entry) -> Option<Seed> {
+        let l = self.get_left(entry).is_none();
+        let r = self.get_right(entry).is_none();
+        if l && r && !entry.src.contains(&self.range.start) && !entry.src.contains(&(self.range.end - 1)) {
+            None
+        } else {
+            Some(Seed {range: (entry.shift + i64::max(self.range.start, entry.src.start))..(i64::min(self.range.end, entry.src.end) + entry.shift)})
+        }
+    }
 
-// fn left(a1: u64, a2: u64, b1: u64, _: u64) -> Option<(u64, u64)> {
-//     if a1 >= b1 {
-//         return None;
-//     }
-//     if a2 <= b1 {
-//         return None;
-//     }
-//     Some((a1, b1))
-// }
-
-// fn center() {
-
-// }
-
-// fn right(a1: u64, a2: u64, b1: u64, b2: u64) -> Option<(u64, u64)> {
-//     todo!()
-// }
+    fn get_right(&self, entry: &Entry) -> Option<Seed> {
+        if self.range.start < entry.src.end && self.range.end > entry.src.end {
+            Some(Seed {range: entry.src.end..self.range.end})
+        } else {
+            None
+        }
+    }
+}
 
 fn lookup2(seeds: &mut Vec<Seed>, dict: &Vec<Entry>) -> Vec<Seed>{
     let mut result: Vec<Seed> = Vec::new();
@@ -112,39 +108,16 @@ fn lookup2(seeds: &mut Vec<Seed>, dict: &Vec<Entry>) -> Vec<Seed>{
         let seed = seeds[i].clone();
         let mut found = false;
         for entry in dict {
-            let mut seed1 = None;
-            let mut seed2 = None;
-            let mut seed3 = None;
-            if seed.start < entry.src && seed.start + seed.len > entry.src {
-                seed1 = Some(Seed { start: seed.start, len: entry.src - seed.start});
-                found = true;
-            }
-            if seed.start < entry.src + entry.len && seed.start + seed.len >= entry.src + entry.len {
-                seed3 = Some(Seed { start: entry.src + entry.len, len: seed.start + seed.len - (entry.src + entry.len)});
-                found = true;
-            }
-            if seed.start <= entry.src && seed.start + seed.len > entry.src || seed.start < entry.src + entry.len && seed.start + seed.len > entry.src + entry.len {
-                let len = if seed3.is_none() && seed1.is_none() {
-                    seed.len
-                } else if seed3.is_none() && seed1.is_some() {
-                    seed.len - (entry.src - seed.start)
-                } else if seed3.is_some() && seed1.is_none() {
-                    entry.len - (seed.start - entry.src)
-                } else {
-                    seed.len - (entry.src - seed.start) - (seed.start + seed.len - (entry.src + entry.len))
-                };
-                let offset = seed.start - entry.src;
-                seed2 = Some(Seed { start: entry.target + offset, len });
-                found = true;
-            }
-            if found {
-                println!("Seed {:?} entry {:?} seed1 {:?} seed2 {:?} seed3 {:?}", seed, entry, seed1, seed2, seed3);
-            }
+            let seed1 = seed.get_left(entry);
+            let seed2 = seed.get_middle(entry);
+            let seed3 = seed.get_right(entry);
+            //println!("seed {:?} entry {:?} seed1 {:?} seed2 {:?} seed3 {:?}", seed, entry, seed1, seed2, seed3);
             if let Some(s) = seed1 {
                 seeds.push(s);
             }
             if let Some(s) = seed2 {
                 result.push(s);
+                found = true;
             }
             if let Some(s) = seed3 {
                 seeds.push(s);
@@ -152,31 +125,9 @@ fn lookup2(seeds: &mut Vec<Seed>, dict: &Vec<Entry>) -> Vec<Seed>{
             if found {
                 break;
             }
-
-            // if seed.start < entry.src && seed.start + seed.len > entry.src {
-            //     seeds.push(Seed { start: seed.start, len: entry.src - seed.start });
-            //     if seed.start + seed.len <= entry.src + entry.len { 
-            //         result.push(Seed { start: entry.target, len: seed.len - (entry.src - seed.start) });
-            //     } else {
-            //         result.push(Seed { start: entry.target, len: entry.len });
-            //         seeds.push(Seed { start: entry.src + entry.len, len: seed.len - entry.len });
-            //     }
-            //     found = true;
-            //     break;
-            // } else if entry.src <= seed.start && seed.start < entry.src + entry.len {
-            //     let offset = seed.start - entry.src;
-            //     if entry.len >= seed.len { 
-            //         result.push(Seed { start: entry.target + offset, len: seed.len });
-            //     } else {
-            //         result.push(Seed { start: entry.target + offset, len: entry.len });
-            //         seeds.push(Seed { start: seed.start + entry.len, len: seed.len - entry.len });
-            //     }
-            //     found = true;
-            //     break;
-            // }
         }
         if !found {
-            result.push(Seed { start: seed.start, len: seed.len });
+            result.push(Seed { range: seed.range });
         }
         i += 1;
     }
@@ -203,22 +154,22 @@ pub fn exec_day5_part2(input: &str) -> String {
     let seeds_values = ints(lines[0]);
     let mut seeds: Vec<Seed> = Vec::new();
     for i in (0..seeds_values.len()-1).step_by(2) {
-        seeds.push(Seed { start: seeds_values[i], len: seeds_values[i+1] });
+        seeds.push(Seed { range: seeds_values[i]..seeds_values[i]+seeds_values[i+1] });
     }
 
     let mut tmp = lookup2(&mut seeds, &dict_s_s);
-    println!("1");
+    //println!("ss TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_s_f);
-    println!("2");
+    // println!("sf TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_f_w);
-    println!("3");
+    // println!("fw TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_w_l);
-    println!("4");
+    // println!("wl TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_l_t);
-    println!("5");
+    // println!("lt TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_t_h);
-    println!("6");
+    // println!("th TMP {:?}", tmp);
     let result = lookup2(&mut tmp, &dict_h_l);
-    println!("7");
-    result.iter().map(|s| s.start).min().unwrap().to_string()
+    // println!("hl TMP {:?}", result);
+    result.iter().map(|s| s.range.start).min().unwrap().to_string()
 }
