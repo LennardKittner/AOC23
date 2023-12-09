@@ -1,4 +1,5 @@
 use std::{fmt::Write, fs::{self, File}, i32, time::Instant, io::Write as IOWrite};
+use std::time::Duration;
 
 use indoc::formatdoc;
 
@@ -9,6 +10,13 @@ fn exec(fun: impl Fn(&str) -> String, input: &str) {
     let result = fun(input);
     let end_time = Instant::now();
     println!("result: {result} time: {:.3}ms", (end_time - start_time).as_secs_f64() * 1000.0);
+}
+
+fn time(fun: impl Fn(&str) -> String, input: &str) -> Duration {
+    let start_time = Instant::now();
+    let _ = fun(input);
+    let end_time = Instant::now();
+    end_time - start_time
 }
 
 fn generate_mod_string(days: &Vec<i32>) -> String {
@@ -33,14 +41,8 @@ fn generate_match_branches(days: &[i32]) -> String {
 pub fn generate(day: i32) {
     let _ = File::create(format!("./input/day{day}.txt")).expect("Failed to generate input");
     let src_file_path = format!("./src/days/day{day}.rs");
-    let days_dir_path = "./src/days";
     let mod_path = "./src/days/mod.rs";
-    let days: Vec<i32> = fs::read_dir(days_dir_path).unwrap().filter_map(|entry| 
-            entry.unwrap().file_name().to_string_lossy().chars()
-                .filter(|c| 
-                    c.is_numeric()
-                ).collect::<String>().parse::<i32>().ok()
-        ).collect();
+    let days = get_days();
     if days.contains(&day) {
         println!("skipping code generation of {src_file_path} already exists");
     } else {
@@ -78,6 +80,17 @@ pub fn generate(day: i32) {
         }}
         "#, generate_mod_string(&days), generate_match_branches(&days)
     }.as_bytes()).unwrap_or_else(|_| panic!("Failed to write {mod_path}."));
+}
+
+fn get_days() -> Vec<i32> {
+    let days_dir_path = "./src/days";
+    let days: Vec<i32> = fs::read_dir(days_dir_path).unwrap().filter_map(|entry|
+        entry.unwrap().file_name().to_string_lossy().chars()
+            .filter(|c|
+                c.is_numeric()
+            ).collect::<String>().parse::<i32>().ok()
+    ).collect();
+    days
 }
 
 pub fn run(day: i32) {
