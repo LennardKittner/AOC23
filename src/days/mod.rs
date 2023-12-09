@@ -1,6 +1,8 @@
 use std::{fs, i32};
+use std::collections::HashMap;
+use std::time::Duration;
 
-use crate::exec;
+use crate::{exec, get_days, time};
 
 mod day3;
 mod day4;
@@ -10,6 +12,27 @@ mod day2;
 mod day8;
 mod day5;
 mod day6;
+
+pub fn benchmark(days: &[i32]) -> HashMap<i32, (Duration, Duration)> {
+    let mut result = HashMap::new();
+    let days = if days.is_empty() { get_days() } else { days.to_vec() };
+    for day in days {
+        let input = match fs::read_to_string(format!("./input/day{}.txt", day)) {
+            Ok(s) => s,
+            Err(_) => return HashMap::new(),
+        };
+        result.insert(day ,match day {
+            3 => {
+                (time(day3::exec_day3_part1, &input), time(day3::exec_day3_part2, &input))
+            },
+            4 => {
+                (time(day4::exec_day4_part1, &input), time(day4::exec_day4_part2, &input))
+            },
+            _ => (Duration::new(0, 0), Duration::new(0, 0)),
+        });
+    }
+    result
+}
 
 
 pub fn run(day: i32) {

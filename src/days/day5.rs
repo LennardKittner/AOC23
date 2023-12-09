@@ -111,7 +111,6 @@ fn lookup2(seeds: &mut Vec<Seed>, dict: &Vec<Entry>) -> Vec<Seed>{
             let seed1 = seed.get_left(entry);
             let seed2 = seed.get_middle(entry);
             let seed3 = seed.get_right(entry);
-            //println!("seed {:?} entry {:?} seed1 {:?} seed2 {:?} seed3 {:?}", seed, entry, seed1, seed2, seed3);
             if let Some(s) = seed1 {
                 seeds.push(s);
             }
@@ -158,18 +157,11 @@ pub fn exec_day5_part2(input: &str) -> String {
     }
 
     let mut tmp = lookup2(&mut seeds, &dict_s_s);
-    //println!("ss TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_s_f);
-    // println!("sf TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_f_w);
-    // println!("fw TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_w_l);
-    // println!("wl TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_l_t);
-    // println!("lt TMP {:?}", tmp);
     let mut tmp = lookup2(&mut tmp, &dict_t_h);
-    // println!("th TMP {:?}", tmp);
     let result = lookup2(&mut tmp, &dict_h_l);
-    // println!("hl TMP {:?}", result);
     result.iter().map(|s| s.range.start).min().unwrap().to_string()
 }
