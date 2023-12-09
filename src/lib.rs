@@ -9,7 +9,7 @@ fn exec(fun: impl Fn(&str) -> String, input: &str) {
     let start_time = Instant::now();
     let result = fun(input);
     let end_time = Instant::now();
-    println!("result: {result} time: {:.3}ms", (end_time - start_time).as_secs_f64() * 1000.0);
+    println!("result: {result} time: {:?}", (end_time - start_time));
 }
 
 fn time(fun: impl Fn(&str) -> String, input: &str) -> Duration {
@@ -42,10 +42,11 @@ pub fn generate(day: i32) {
     let _ = File::create(format!("./input/day{day}.txt")).expect("Failed to generate input");
     let src_file_path = format!("./src/days/day{day}.rs");
     let mod_path = "./src/days/mod.rs";
-    let days = get_days();
+    let mut days = get_days();
     if days.contains(&day) {
         println!("skipping code generation of {src_file_path} already exists");
     } else {
+        days.push(day);
         let mut new_day = File::create(&src_file_path).expect("Failed to generate source.");
         new_day.write_all(formatdoc!{
             r#"
