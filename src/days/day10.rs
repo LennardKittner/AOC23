@@ -67,11 +67,11 @@ fn find_start(grid: &Vec<&[u8]>) -> (usize, usize) {
             }
         }
     }
-    return start;
+    start
 }
 
 fn get_next(curr_cord: &(usize, usize), curr: &char, from: &Direction) -> ((usize, usize), Direction) {
-    match (get_pip(&curr), &from) {
+    match (get_pip(curr), &from) {
         (UpDown, Up) => ((curr_cord.0, curr_cord.1 - 1), Up),
         (UpDown, Down) => ((curr_cord.0, curr_cord.1 + 1), Down),
         (LeftRight, Left) => ((curr_cord.0 - 1, curr_cord.1), Left),

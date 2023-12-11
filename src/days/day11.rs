@@ -26,15 +26,15 @@ pub fn exec_day11_part1(input: &str) -> String {
     }
     for x in (0..grid[0].len()).rev() {
         let mut all_empty = true;
-        for y in 0..grid.len() {
-            if grid[y][x].galaxy {
+        for l in grid.iter_mut() {
+            if l[x].galaxy {
                 all_empty = false;
                 break;
             }
         }
         if all_empty {
-            for y in 0..grid.len() {
-                grid[y].insert(x+1, Entry {
+            for l in grid.iter_mut() {
+                l.insert(x+1, Entry {
                     galaxy: false,
                     marked: false,
                     distance: 0,
@@ -57,9 +57,9 @@ pub fn exec_day11_part1(input: &str) -> String {
     result.to_string()
 }
 
-fn bfs(x: usize, y: usize, grid: &Vec<Vec<Entry>>) -> u64 {
+fn bfs(x: usize, y: usize, grid: &[Vec<Entry>]) -> u64 {
     let mut result = 0;
-    let mut working_grid = grid.clone();
+    let mut working_grid = grid.to_owned();
     let mut queue = Vec::new();
     queue.push((x, y));
     working_grid[y][x].marked = true;
@@ -112,7 +112,7 @@ fn bfs(x: usize, y: usize, grid: &Vec<Vec<Entry>>) -> u64 {
 
 pub fn exec_day11_part2(input: &str) -> String {
     let lines = input.lines().map(|l| l.as_bytes().iter().dedup_with_count().collect_vec()).collect_vec();
-    let grid = input.lines().map(|s| s.as_bytes().iter().map(|c| Entry {
+    let mut grid = input.lines().map(|s| s.as_bytes().iter().map(|c| Entry {
         galaxy: *c == b'#',
         marked: false,
         distance: 0,
@@ -127,8 +127,8 @@ pub fn exec_day11_part2(input: &str) -> String {
     }
     for x in (0..grid[0].len()).rev() {
         let mut all_empty = true;
-        for y in 0..grid.len() {
-            if grid[y][x].galaxy {
+        for (y, l) in grid.iter_mut().enumerate() {
+            if l[x].galaxy {
                 galaxies.push((x, y));
                 all_empty = false;
             }
