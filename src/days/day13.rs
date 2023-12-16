@@ -1,5 +1,4 @@
 use std::usize;
-use itertools::Itertools;
 
 pub fn exec_day13_part1(input: &str) -> String {
     let mut grids = Vec::new();
@@ -101,13 +100,11 @@ pub fn exec_day13_part2(input: &str) -> String {
             continue;
         }
         for axis in 1..grid.len() {
-            valid = false;
             let mut diff = 0;
             for i in 0..usize::min(axis, grid.len() - axis) {
-                diff += compare(&grid[axis -i - 1], &grid[axis + i]);
+                diff += compare(grid[axis -i - 1], grid[axis + i]);
             }
             if diff == 1 {
-                valid = true;
                 result += axis * 100;
                 break;
             }
