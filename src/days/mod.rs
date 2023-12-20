@@ -10,6 +10,7 @@ mod day1;
 mod day7;
 mod day14;
 mod day2;
+mod day17;
 mod day8;
 mod day16;
 mod day12;
@@ -18,7 +19,7 @@ mod day10;
 mod day9;
 mod day6;
 mod day13;
-mod day17;
+mod day19;
 
 
 pub fn run(day: i32) {
@@ -60,6 +61,10 @@ pub fn run(day: i32) {
             exec(day2::exec_day2_part1, &input);
             exec(day2::exec_day2_part2, &input);
         },
+        17 => {
+            exec(day17::exec_day17_part1, &input);
+            exec(day17::exec_day17_part2, &input);
+        },
         8 => {
             exec(day8::exec_day8_part1, &input);
             exec(day8::exec_day8_part2, &input);
@@ -92,9 +97,9 @@ pub fn run(day: i32) {
             exec(day13::exec_day13_part1, &input);
             exec(day13::exec_day13_part2, &input);
         },
-        17 => {
-            exec(day17::exec_day17_part1, &input);
-            exec(day17::exec_day17_part2, &input);
+        19 => {
+            exec(day19::exec_day19_part1, &input);
+            exec(day19::exec_day19_part2, &input);
         },
         _ => (),
     }
