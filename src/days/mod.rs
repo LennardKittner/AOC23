@@ -5,6 +5,7 @@ use crate::exec;
 mod day14;
 mod day9;
 mod day10;
+mod day24;
 mod day11;
 mod day15;
 mod day8;
@@ -20,7 +21,7 @@ mod day12;
 mod day16;
 mod day17;
 mod day13;
-mod day24;
+mod day18;
 
 
 pub fn run(day: i32) {
@@ -41,6 +42,10 @@ pub fn run(day: i32) {
         10 => {
             exec(day10::exec_day10_part1, &input);
             exec(day10::exec_day10_part2, &input);
+        },
+        24 => {
+            exec(day24::exec_day24_part1, &input);
+            exec(day24::exec_day24_part2, &input);
         },
         11 => {
             exec(day11::exec_day11_part1, &input);
@@ -102,9 +107,9 @@ pub fn run(day: i32) {
             exec(day13::exec_day13_part1, &input);
             exec(day13::exec_day13_part2, &input);
         },
-        24 => {
-            exec(day24::exec_day24_part1, &input);
-            exec(day24::exec_day24_part2, &input);
+        18 => {
+            exec(day18::exec_day18_part1, &input);
+            exec(day18::exec_day18_part2, &input);
         },
         _ => (),
     }
