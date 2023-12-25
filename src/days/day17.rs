@@ -1,7 +1,6 @@
 use std::cmp::Ordering;
 use itertools::Itertools;
 use priority_queue::PriorityQueue;
-use log::log;
 
 pub fn exec_day17_part1(input: &str) -> String {
     let grid = input.lines().map(|l| l.as_bytes().iter().map(|b| b - b'0').collect_vec()).collect_vec();
