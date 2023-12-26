@@ -13,29 +13,7 @@ struct Brick {
 
 pub fn exec_day22_part1(input: &str) -> String {
     let mut bricks = parse(input);
-    let mut occupied: HashMap<(i64, i64, i64), usize> = HashMap::new();
-    for i in 0..bricks.len() {
-        let mut new_z: i64 = 1;
-        for z in (1i64..*bricks[i].z.start()).rev() {
-            for x in bricks[i].x.clone() {
-                for y in bricks[i].y.clone() {
-                    if let Some(child) = occupied.get(&(x, y, z)) {
-                        bricks[*child].parents.insert(i);
-                        bricks[i].children.insert(*child);
-                        new_z = z+1;
-                    }
-                }
-            }
-            if new_z != 1 {
-                break;
-            }
-        }
-        for x in bricks[i].x.clone() {
-            for y in bricks[i].y.clone() {
-                occupied.insert((x, y, new_z + bricks[i].z.try_len().unwrap() as i64 - 1), i);
-            }
-        }
-    }
+    simulate_falling(&mut bricks);
     let mut result = 0;
     for brick in &bricks {
         let mut safe = true;
@@ -71,6 +49,30 @@ fn parse(input: &str) -> Vec<Brick> {
 
 pub fn exec_day22_part2(input: &str) -> String {
     let mut bricks = parse(input);
+    simulate_falling(&mut bricks);
+
+    let mut result = 0;
+    for i in 0..bricks.len() {
+        let mut working_bricks = bricks.clone();
+        working_bricks[i].children.clear();
+        result += delete_recursive(&mut working_bricks, i) - 1;
+    }
+    result.to_string()
+}
+
+fn delete_recursive(bricks: &mut Vec<Brick>, curr: usize) -> u64 {
+    if !bricks[curr].children.is_empty() {
+        return 0;
+    }
+    let mut result = 1;
+    for brick in &bricks[curr].parents.clone() {
+        bricks[*brick].children.remove(&curr);
+        result += delete_recursive(bricks, *brick);
+    }
+    result
+}
+
+fn simulate_falling(bricks: &mut Vec<Brick>) {
     let mut occupied: HashMap<(i64, i64, i64), usize> = HashMap::new();
     for i in 0..bricks.len() {
         let mut new_z: i64 = 1;
@@ -80,7 +82,7 @@ pub fn exec_day22_part2(input: &str) -> String {
                     if let Some(child) = occupied.get(&(x, y, z)) {
                         bricks[*child].parents.insert(i);
                         bricks[i].children.insert(*child);
-                        new_z = z+1;
+                        new_z = z + 1;
                     }
                 }
             }
@@ -94,23 +96,4 @@ pub fn exec_day22_part2(input: &str) -> String {
             }
         }
     }
-    let mut result = 0;
-    for brick in &bricks {
-        let mut safe = true;
-        for parent in &brick.parents {
-            if bricks[*parent].children.len() == 1usize {
-                safe = false;
-                break;
-            }
-        }
-        if safe {
-            result += 1;
-        }
-    }
-    let mut result = 0;
-    for i in 0..bricks.len() {
-        let mut working_bricks = bricks.clone();
-
-    }
-    result.to_string()
 }
