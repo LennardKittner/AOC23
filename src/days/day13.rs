@@ -1,15 +1,7 @@
 use std::usize;
 
 pub fn exec_day13_part1(input: &str) -> String {
-    let mut grids = Vec::new();
-    grids.push(Vec::new());
-    for line in input.lines() {
-        if !line.contains('#') {
-            grids.push(Vec::new());
-            continue;
-        }
-        grids.last_mut().unwrap().push(line.as_bytes());
-    }
+    let grids = parse(input);
     let mut result = 0;
     for grid in &grids {
         let len = grid[0].len();
@@ -68,15 +60,7 @@ fn compare(a1: &[u8], a2: &[u8]) -> i32 {
 }
 
 pub fn exec_day13_part2(input: &str) -> String {
-    let mut grids = Vec::new();
-    grids.push(Vec::new());
-    for line in input.lines() {
-        if !line.contains('#') {
-            grids.push(Vec::new());
-            continue;
-        }
-        grids.last_mut().unwrap().push(line.as_bytes());
-    }
+    let grids = parse(input);
     let mut result = 0;
     for grid in &grids {
         let len = grid[0].len();
@@ -111,4 +95,17 @@ pub fn exec_day13_part2(input: &str) -> String {
         }
     }
     result.to_string()
+}
+
+fn parse(input: &str) -> Vec<Vec<&[u8]>> {
+    let mut grids = Vec::new();
+    grids.push(Vec::new());
+    for line in input.lines() {
+        if !line.contains('#') {
+            grids.push(Vec::new());
+            continue;
+        }
+        grids.last_mut().unwrap().push(line.as_bytes());
+    }
+    grids
 }

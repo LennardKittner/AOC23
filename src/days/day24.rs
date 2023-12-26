@@ -68,5 +68,5 @@ pub fn exec_day24_part1(input: &str) -> String {
 }
 
 pub fn exec_day24_part2(input: &str) -> String {
-    2.to_string()
+    todo!("{}", input.len())
 }

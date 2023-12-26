@@ -3,15 +3,13 @@ use itertools::Itertools;
 fn combinations(springs: &[u8], nums: &[usize]) -> i32 {
     if nums.is_empty() {
         return 1;
-    } else if springs.is_empty() {
-        return 0;
-    } else if nums[0] > springs.len() {
+    } else if springs.is_empty() || nums[0] > springs.len() {
         return 0;
     }
     let mut springs = springs.to_vec();
     match springs[0] {
         b'.' => {
-            combinations(&springs[1..springs.len()], &nums)
+            combinations(&springs[1..springs.len()], nums)
         },
         b'?' => {
             springs[0] = b'#';
@@ -20,7 +18,7 @@ fn combinations(springs: &[u8], nums: &[usize]) -> i32 {
                 result += combinations(&springs[(nums[0]+1)..springs.len()], &nums[1..nums.len()]);
             }
             springs[0] = b'.';
-            result += combinations(&springs[1..springs.len()], &nums);
+            result += combinations(&springs[1..springs.len()], nums);
             result
         }
         b'#' => {
@@ -55,5 +53,5 @@ pub fn exec_day12_part1(input: &str) -> String {
 }
 
 pub fn exec_day12_part2(input: &str) -> String {
-    1.to_string()
+    todo!("{}", input.len())
 }

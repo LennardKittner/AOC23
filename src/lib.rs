@@ -12,6 +12,7 @@ fn exec(fun: impl Fn(&str) -> String, input: &str) {
     println!("result: {result} time: {:?}", (end_time - start_time));
 }
 
+#[allow(dead_code)]
 fn time(fun: impl Fn(&str) -> String, input: &str) -> Duration {
     let start_time = Instant::now();
     let _ = fun(input);

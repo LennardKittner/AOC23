@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::ops::RangeInclusive;
 use itertools::Itertools;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Brick {
     x: RangeInclusive<i64>,
     y: RangeInclusive<i64>,
@@ -12,19 +12,7 @@ struct Brick {
 }
 
 pub fn exec_day22_part1(input: &str) -> String {
-    let mut bricks = input.lines().map(|line| {
-        let values = line.split('~').map(|half| half.split(',').map(|n| n.trim().parse::<i64>().unwrap()).collect_vec()).collect_vec();
-        Brick {
-            x: values[0][0]..=values[1][0],
-            y: values[0][1]..=values[1][1],
-            z: values[0][2]..=values[1][2],
-            parents: HashSet::new(),
-            children: HashSet::new(),
-        }
-    }).collect_vec();
-    bricks.sort_by(|b1, b2| {
-        b1.z.start().cmp(b2.z.start())
-    });
+    let mut bricks = parse(input);
     let mut occupied: HashMap<(i64, i64, i64), usize> = HashMap::new();
     for i in 0..bricks.len() {
         let mut new_z: i64 = 1;
@@ -64,11 +52,7 @@ pub fn exec_day22_part1(input: &str) -> String {
     result.to_string()
 }
 
-fn delete() {
-
-}
-
-pub fn exec_day22_part2(input: &str) -> String {
+fn parse(input: &str) -> Vec<Brick> {
     let mut bricks = input.lines().map(|line| {
         let values = line.split('~').map(|half| half.split(',').map(|n| n.trim().parse::<i64>().unwrap()).collect_vec()).collect_vec();
         Brick {
@@ -82,6 +66,11 @@ pub fn exec_day22_part2(input: &str) -> String {
     bricks.sort_by(|b1, b2| {
         b1.z.start().cmp(b2.z.start())
     });
+    bricks
+}
+
+pub fn exec_day22_part2(input: &str) -> String {
+    let mut bricks = parse(input);
     let mut occupied: HashMap<(i64, i64, i64), usize> = HashMap::new();
     for i in 0..bricks.len() {
         let mut new_z: i64 = 1;

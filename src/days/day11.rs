@@ -9,12 +9,7 @@ struct Entry {
 }
 
 pub fn exec_day11_part1(input: &str) -> String {
-    let lines = input.lines().map(|l| l.as_bytes().iter().dedup_with_count().collect_vec()).collect_vec();
-    let mut grid = input.lines().map(|s| s.as_bytes().iter().map(|c| Entry {
-        galaxy: *c == b'#',
-        marked: false,
-        distance: 0,
-    } ).collect_vec()).collect_vec();
+    let (lines, mut grid) = parse(input);
     for i in (0..lines.len()).rev() {
         if lines[i].len() == 1 {
             grid.insert(i+1, vec![Entry {
@@ -55,6 +50,16 @@ pub fn exec_day11_part1(input: &str) -> String {
     }
     // println!("{}", grid.iter().map(|l| l.iter().map(|e| if e.galaxy {'#'} else {'.'}).join("")).join("\n"));
     result.to_string()
+}
+
+fn parse(input: &str) -> (Vec<Vec<(usize, &u8)>>, Vec<Vec<Entry>>) {
+    let lines = input.lines().map(|l| l.as_bytes().iter().dedup_with_count().collect_vec()).collect_vec();
+    let grid = input.lines().map(|s| s.as_bytes().iter().map(|c| Entry {
+        galaxy: *c == b'#',
+        marked: false,
+        distance: 0,
+    }).collect_vec()).collect_vec();
+    (lines, grid)
 }
 
 fn bfs(x: usize, y: usize, grid: &[Vec<Entry>]) -> u64 {
@@ -111,12 +116,7 @@ fn bfs(x: usize, y: usize, grid: &[Vec<Entry>]) -> u64 {
 }
 
 pub fn exec_day11_part2(input: &str) -> String {
-    let lines = input.lines().map(|l| l.as_bytes().iter().dedup_with_count().collect_vec()).collect_vec();
-    let mut grid = input.lines().map(|s| s.as_bytes().iter().map(|c| Entry {
-        galaxy: *c == b'#',
-        marked: false,
-        distance: 0,
-    } ).collect_vec()).collect_vec();
+    let (lines, mut grid) = parse(input);
     let mut rows = HashSet::new();
     let mut columns = HashSet::new();
     let mut galaxies = Vec::new();

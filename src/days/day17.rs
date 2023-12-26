@@ -8,7 +8,7 @@ pub fn exec_day17_part1(input: &str) -> String {
 }
 
 pub fn exec_day17_part2(input: &str) -> String {
-    0.to_string()
+    todo!("{}", input.len())
 }
 
 struct Distance {
@@ -114,7 +114,7 @@ fn dijkstra(grid: &[Vec<u8>]) -> u64 {
         }
         //println!("{}\n--------------", marks_and_distance.iter().map(|l| format!("{:?}", l)).join("\n"));
     }
-    let mut g2 = grid.clone().to_vec();
+    let mut g2 = grid.to_vec();
     let mut curr = (g2[0].len()-1, g2.len()-1);
     loop {
         g2[curr.1][curr.0] = 0;

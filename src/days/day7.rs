@@ -79,13 +79,7 @@ pub fn exec_day7_part1(input: &str) -> String {
     map.insert('4', 4);
     map.insert('3', 3);
     map.insert('2', 2);
-    let mut entries: Vec<Entry> = input.lines().map(|l| {
-        let parts: Vec<&str> = l.split(' ').collect();
-        Entry {
-            hand: parts[0].chars().map(|c| map[&c]).collect::<Vec<i32>>(),
-            bid: parts[1].parse().unwrap(),
-        }
-    }).collect();
+    let mut entries = parse(input, map);
     entries.sort_by(|e1, e2| compare(e1, e2, value));
     entries.iter().enumerate().map(|(i, e)| e.bid * (i+1) as u64).sum::<u64>().to_string()
 }
@@ -105,18 +99,21 @@ pub fn exec_day7_part2(input: &str) -> String {
     map.insert('3', 3);
     map.insert('2', 2);
     map.insert('J', 1);
-    let mut entries: Vec<Entry> = input.lines().map(|l| {
+    let mut entries = parse(input, map);
+    entries.sort_by(|e1, e2| compare(e1, e2, value2));
+    entries.iter().enumerate().map(|(i, e)| e.bid * (i+1) as u64).sum::<u64>().to_string()
+}
+
+fn parse(input: &str, map: HashMap<char, i32>) -> Vec<Entry> {
+    let entries: Vec<Entry> = input.lines().map(|l| {
         let parts: Vec<&str> = l.split(' ').collect();
         Entry {
             hand: parts[0].chars().map(|c| map[&c]).collect::<Vec<i32>>(),
             bid: parts[1].parse().unwrap(),
         }
     }).collect();
-
-    entries.sort_by(|e1, e2| compare(e1, e2, value2));
-    entries.iter().enumerate().map(|(i, e)| e.bid * (i+1) as u64).sum::<u64>().to_string()
+    entries
 }
-
 
 fn value2(entry: &Entry) -> i32 {
     let mut encounters: HashMap<i32, i32>  = HashMap::new();

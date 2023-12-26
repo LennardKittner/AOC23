@@ -1,5 +1,3 @@
-use std::arch::aarch64::veor_s8;
-use std::path::Prefix::Verbatim;
 use itertools::Itertools;
 
 pub fn exec_day18_part1(input: &str) -> String {
@@ -21,13 +19,12 @@ pub fn exec_day18_part1(input: &str) -> String {
         };
         points.push(curr);
     }
-    // let mut grid = vec![vec!['.'; 7]; 10];
-    // for (i, point) in points.iter().enumerate() {
-    //     grid[point.1 as usize][point.0 as usize] = i.to_string().chars().rev().next().unwrap();
-    // }
-    // println!("{}", grid.iter().map(|l| l.iter().map(|c| c.to_string()).join("")).join("\n"));
+    day18(&points, &bonus)
+}
+
+fn day18(points: &Vec<(i64, i64)>, bonus: &i64) -> String {
     let mut result: i64 = 0;
-    let mut j = &points.len()-1;
+    let mut j = &points.len() - 1;
     for (i, point) in points.iter().enumerate() {
         result += (point.0 + points[j].0) * (points[j].1 - point.1);
         j = i;
@@ -56,16 +53,5 @@ pub fn exec_day18_part2(input: &str) -> String {
         };
         points.push(curr);
     }
-    // let mut grid = vec![vec!['.'; 7]; 10];
-    // for (i, point) in points.iter().enumerate() {
-    //     grid[point.1 as usize][point.0 as usize] = i.to_string().chars().rev().next().unwrap();
-    // }
-    // println!("{}", grid.iter().map(|l| l.iter().map(|c| c.to_string()).join("")).join("\n"));
-    let mut result: i64 = 0;
-    let mut j = &points.len()-1;
-    for (i, point) in points.iter().enumerate() {
-        result += (point.0 + points[j].0) * (points[j].1 - point.1);
-        j = i;
-    }
-    (result.abs() / 2 + bonus + 1).to_string()
+    day18(&points, &bonus)
 }

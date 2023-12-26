@@ -37,14 +37,9 @@ fn get_pip(curr: &char) -> Pipe {
     }
 }
 
-//fn get_start_configuration(grid: &[&[u8]], start: &(usize, usize)) -> (Pipe, Direction) {
-//    todo!()
-//}
-
 pub fn exec_day10_part1(input: &str) -> String {
     let grid = input.lines().map(|l| l.as_bytes()).collect_vec();
     let start = find_start(&grid);
-    // let (curr, from) = get_start_configuration(&grid, &start);
     let mut curr_cord = start;
     let mut curr = 'L'; //TODO: calc
     let mut from = Down; //TODO: calc
@@ -117,7 +112,6 @@ pub fn exec_day10_part2(input: &str) -> String {
     let start = find_start(&grid);
     let mut cycle = HashSet::new();
     let mut cycle2 = HashSet::new();
-    // let (curr, from) = get_start_configuration(&grid, &start);
     let mut curr_cord = start;
     let mut curr = 'L'; //TODO: calc
     let mut from = Left; //TODO: calc
@@ -128,17 +122,14 @@ pub fn exec_day10_part2(input: &str) -> String {
         cycle.insert((curr_cord, from, curr));
         cycle2.insert(curr_cord);
     }
-    //let mut grid2 = grid.iter().map(|l| l.to_vec()).collect::<Vec<Vec<u8>>>();
 
     let mut result = 0;
     for y in 0..grid.len() {
         for x in 0..grid.first().unwrap().len() {
             if is_inner(grid.first().unwrap().len(), &cycle, &cycle2, (x, y)) {
                 result += 1;
-                //grid2[y][x] = b'I';
             }
         }
     }
-    //println!("{}", grid2.iter().map(|l| l.iter().map(|c| *c as char).join("")).join("\n"));
     result.to_string()
 }

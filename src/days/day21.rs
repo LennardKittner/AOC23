@@ -1,7 +1,5 @@
 use std::collections::HashSet;
-use indoc::printdoc;
 use itertools::Itertools;
-
 
 fn bfs(x: usize, y: usize, grid: &[&[u8]], steps: i32) -> u64 {
     let mut queue = HashSet::new();
@@ -66,5 +64,5 @@ pub fn exec_day21_part1(input: &str) -> String {
 }
 
 pub fn exec_day21_part2(input: &str) -> String {
-    2.to_string()
+    todo!("{}", input.len())
 }

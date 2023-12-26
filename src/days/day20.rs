@@ -45,63 +45,7 @@ struct Operation {
 }
 
 pub fn exec_day20_part1(input: &str) -> String {
-    let mut rules = HashMap::new();
-    let mut inputs: HashMap<String, HashMap<String, bool>> = HashMap::new();
-    for line in input.lines() {
-        let values = line.split(" -> ").collect_vec();
-        rules.insert(values[0][1..values[0].len()].to_string(), match values[0].chars().next().unwrap() {
-            '&' => {
-                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
-                for target in &targets {
-                    if let Some(map) = inputs.get_mut(target) {
-                        map.insert(values[0][1..values[0].len()].to_string(), false);
-                    } else {
-                        let mut tmp: HashMap<String, bool> = HashMap::new();
-                        tmp.insert(values[0][1..values[0].len()].to_string(), false);
-                        inputs.insert(target.to_string(), tmp);
-                    }
-                }
-                Conjunction{ inputs: HashMap::new(), targets }
-            },
-            '%' => {
-                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
-                for target in &targets {
-                    if let Some(map) = inputs.get_mut(target) {
-                        map.insert(values[0][1..values[0].len()].to_string(), false);
-                    } else {
-                        let mut tmp: HashMap<String, bool> = HashMap::new();
-                        tmp.insert(values[0][1..values[0].len()].to_string(), false);
-                        inputs.insert(target.to_string(), tmp);
-                    }
-                }
-                FlipFlop{ state: false, targets }
-            },
-            'b' => {
-                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
-                for target in &targets {
-                    if let Some(map) = inputs.get_mut(target) {
-                        map.insert(values[0][1..values[0].len()].to_string(), false);
-                    } else {
-                        let mut tmp: HashMap<String, bool> = HashMap::new();
-                        tmp.insert(values[0][1..values[0].len()].to_string(), false);
-                        inputs.insert(target.to_string(), tmp);
-                    }
-                }
-                Broadcast{ targets }
-            },
-            _ => panic!("how")
-        });
-    }
-
-    for (name, rule) in rules.iter_mut() {
-        if let Some(map) = inputs.remove(name) {
-            match rule {
-                Broadcast{..} => (),
-                FlipFlop{..} => (),
-                Conjunction {inputs, ..} => *inputs = map,
-            }
-        }
-    }
+    let (mut rules, _, _) = parse(input);
 
     let mut low_pulses = 0;
     let mut high_pulses = 0;
@@ -142,66 +86,7 @@ pub fn exec_day20_part1(input: &str) -> String {
 }
 
 pub fn exec_day20_part2(input: &str) -> String {
-    let mut rules = HashMap::new();
-    let mut inputs: HashMap<String, HashMap<String, bool>> = HashMap::new();
-    for line in input.lines() {
-        let values = line.split(" -> ").collect_vec();
-        rules.insert(values[0][1..values[0].len()].to_string(), match values[0].chars().next().unwrap() {
-            '&' => {
-                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
-                for target in &targets {
-                    if let Some(map) = inputs.get_mut(target) {
-                        map.insert(values[0][1..values[0].len()].to_string(), false);
-                    } else {
-                        let mut tmp: HashMap<String, bool> = HashMap::new();
-                        tmp.insert(values[0][1..values[0].len()].to_string(), false);
-                        inputs.insert(target.to_string(), tmp);
-                    }
-                }
-                Conjunction{ inputs: HashMap::new(), targets }
-            },
-            '%' => {
-                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
-                for target in &targets {
-                    if let Some(map) = inputs.get_mut(target) {
-                        map.insert(values[0][1..values[0].len()].to_string(), false);
-                    } else {
-                        let mut tmp: HashMap<String, bool> = HashMap::new();
-                        tmp.insert(values[0][1..values[0].len()].to_string(), false);
-                        inputs.insert(target.to_string(), tmp);
-                    }
-                }
-                FlipFlop{ state: false, targets }
-            },
-            'b' => {
-                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
-                for target in &targets {
-                    if let Some(map) = inputs.get_mut(target) {
-                        map.insert(values[0][1..values[0].len()].to_string(), false);
-                    } else {
-                        let mut tmp: HashMap<String, bool> = HashMap::new();
-                        tmp.insert(values[0][1..values[0].len()].to_string(), false);
-                        inputs.insert(target.to_string(), tmp);
-                    }
-                }
-                Broadcast{ targets }
-            },
-            _ => panic!("how")
-        });
-    }
-
-    let mut input_to_rx = inputs["rx"].keys().next().unwrap().to_string();
-    let mut inputs_to_check: HashMap<String, i64> = inputs[&input_to_rx].keys().map(|k| (k.to_string(), -1)).collect();
-
-    for (name, rule) in rules.iter_mut() {
-        if let Some(map) = inputs.remove(name) {
-            match rule {
-                Broadcast{..} => (),
-                FlipFlop{..} => (),
-                Conjunction {inputs, ..} => *inputs = map,
-            }
-        }
-    }
+    let (mut rules, input_to_rx, mut inputs_to_check) = parse(input);
 
     let mut cache: HashMap<String, HashMap<String, Rule>> = HashMap::new();
     let mut round = 0;
@@ -234,4 +119,56 @@ pub fn exec_day20_part2(input: &str) -> String {
         cache.insert(before, rules.clone());
     }
     inputs_to_check.values().fold(1, |a, &d| lcm(a, d)).to_string()
+}
+
+fn parse(input: &str) -> (HashMap<String, Rule>, String, HashMap<String, i64>) {
+    let mut rules = HashMap::new();
+    let mut inputs: HashMap<String, HashMap<String, bool>> = HashMap::new();
+    for line in input.lines() {
+        let values = line.split(" -> ").collect_vec();
+        rules.insert(values[0][1..values[0].len()].to_string(), match values[0].chars().next().unwrap() {
+            '&' => {
+                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
+                update_inputs(&mut inputs, &values, &targets);
+                Conjunction { inputs: HashMap::new(), targets }
+            },
+            '%' => {
+                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
+                update_inputs(&mut inputs, &values, &targets);
+                FlipFlop { state: false, targets }
+            },
+            'b' => {
+                let targets = values[1].split(", ").map(|s| s.to_string()).collect_vec();
+                update_inputs(&mut inputs, &values, &targets);
+                Broadcast { targets }
+            },
+            _ => panic!("how")
+        });
+    }
+
+    let input_to_rx = inputs["rx"].keys().next().unwrap().to_string();
+    let inputs_to_check: HashMap<String, i64> = inputs[&input_to_rx].keys().map(|k| (k.to_string(), -1)).collect();
+
+    for (name, rule) in rules.iter_mut() {
+        if let Some(map) = inputs.remove(name) {
+            match rule {
+                Broadcast { .. } => (),
+                FlipFlop { .. } => (),
+                Conjunction { inputs, .. } => *inputs = map,
+            }
+        }
+    }
+    (rules, input_to_rx, inputs_to_check)
+}
+
+fn update_inputs(inputs: &mut HashMap<String, HashMap<String, bool>>, values: &[&str], targets: &[String]) {
+    for target in targets {
+        if let Some(map) = inputs.get_mut(target) {
+            map.insert(values[0][1..values[0].len()].to_string(), false);
+        } else {
+            let mut tmp: HashMap<String, bool> = HashMap::new();
+            tmp.insert(values[0][1..values[0].len()].to_string(), false);
+            inputs.insert(target.to_string(), tmp);
+        }
+    }
 }

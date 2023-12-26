@@ -46,6 +46,7 @@ pub fn exec_day25_part1(input: &str) -> String {
     result.to_string()
 }
 
+#[allow(unused_variables)]
 pub fn exec_day25_part2(input: &str) -> String {
-    3.to_string()
+    "Nothing to do".to_string()
 }
