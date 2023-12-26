@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use itertools::Itertools;
+use num_integer::lcm;
 use crate::days::day20::Rule::{Broadcast, Conjunction, FlipFlop};
 
 #[derive(Clone, Debug)]
@@ -189,6 +190,9 @@ pub fn exec_day20_part2(input: &str) -> String {
         });
     }
 
+    let mut input_to_rx = inputs["rx"].keys().next().unwrap().to_string();
+    let mut inputs_to_check: HashMap<String, i64> = inputs[&input_to_rx].keys().map(|k| (k.to_string(), -1)).collect();
+
     for (name, rule) in rules.iter_mut() {
         if let Some(map) = inputs.remove(name) {
             match rule {
@@ -200,28 +204,23 @@ pub fn exec_day20_part2(input: &str) -> String {
     }
 
     let mut cache: HashMap<String, HashMap<String, Rule>> = HashMap::new();
-    let mut found_rx = false;
     let mut round = 0;
     loop {
-        if round % 100000 == 0 {
-            println!("{round}");
-        }
+        round += 1;
         let mut operations = vec![Operation {
             from: "button".to_string(),
             pulse: false,
             target: "roadcaster".to_string(),
         }];
         let before = format!("{:?}", rules);
-        round += 1;
         if let Some(a) = cache.get(&before) {
             rules = a.clone();
             continue;
         }
         while !operations.is_empty() {
             let curr = operations.remove(0);
-            if curr.target == "rx" && !curr.pulse {
-                found_rx = true;
-                break;
+            if inputs_to_check.contains_key(&curr.from) && curr.target == input_to_rx && curr.pulse && inputs_to_check[&curr.from] < 0 {
+                inputs_to_check.insert(curr.from.to_string(), round);
             }
             if !rules.keys().contains(&curr.target) {
                 continue;
@@ -229,10 +228,10 @@ pub fn exec_day20_part2(input: &str) -> String {
             let mut new_ops = rules.get_mut(&curr.target).unwrap().receive(&curr);
             operations.append(&mut new_ops);
         }
-        if found_rx {
+        if inputs_to_check.iter().filter(|(_, &n)| n < 0).count() == 0 {
             break;
         }
         cache.insert(before, rules.clone());
     }
-    round.to_string()
+    inputs_to_check.values().fold(1, |a, &d| lcm(a, d)).to_string()
 }
