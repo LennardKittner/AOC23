@@ -2,31 +2,31 @@ use itertools::Itertools;
 
 fn combinations(springs: &[u8], nums: &[usize]) -> i32 {
     if nums.is_empty() {
-        return 1;
+        return if springs.contains(&b'#') { 0 } else { 1 };
     } else if springs.is_empty() || nums[0] > springs.len() {
         return 0;
     }
     let mut springs = springs.to_vec();
     match springs[0] {
         b'.' => {
-            combinations(&springs[1..springs.len()], nums)
+            combinations(&springs[1..], nums)
+        },
+        b'#' => {
+            if !springs[..nums[0]].contains(&b'.') && (springs.len() == nums[0] || springs[nums[0]] != b'#') {
+                combinations(if springs.len() == nums[0] { &[] } else { &springs[(nums[0]+1)..] }, &nums[1..])
+            } else {
+                0
+            }
         },
         b'?' => {
             springs[0] = b'#';
             let mut result = 0;
-            if !springs[0..nums[0]].contains(&b'.') && (springs.len() == nums[0] ||  springs[nums[0]] == b'.') {
-                result += combinations(&springs[(nums[0]+1)..springs.len()], &nums[1..nums.len()]);
+            if !springs[..nums[0]].contains(&b'.') && (springs.len() == nums[0] || springs[nums[0]] != b'#') {
+                result += combinations(if springs.len() == nums[0] { &[] } else { &springs[(nums[0]+1)..] }, &nums[1..])
             }
             springs[0] = b'.';
-            result += combinations(&springs[1..springs.len()], nums);
+            result += combinations(if springs.len() == 1 { &[] } else { &springs[1..] }, nums);
             result
-        }
-        b'#' => {
-            if !springs[0..nums[0]].contains(&b'.') && springs[nums[0]+1] == b'.' {
-                combinations(&springs[(nums[0]+1)..springs.len()], &nums[1..nums.len()])
-            } else {
-                0
-            }
         },
         _ => panic!("unknons symbol")
     }
@@ -46,8 +46,6 @@ pub fn exec_day12_part1(input: &str) -> String {
     for line in lines {
         let tmp = combinations(line.0, &line.1);
         result += tmp;
-        println!("{:?}", tmp);
-        //println!("{:?}", v);
     }
     result.to_string()
 }
