@@ -1,12 +1,13 @@
 use itertools::Itertools;
 
+#[warn(dead_code)]
 struct Hail {
     px: f64,
     py: f64,
-    pz: f64,
+    //pz: f64,
     vx: f64,
     vy: f64,
-    vz: f64,
+    //vz: f64,
 }
 
 // y = mx + b
@@ -44,10 +45,10 @@ pub fn exec_day24_part1(input: &str) -> String {
         Hail {
             px: values[0][0],
             py: values[0][1],
-            pz: values[0][2],
+            //pz: values[0][2],
             vx: values[1][0],
             vy: values[1][1],
-            vz: values[1][2],
+            //vz: values[1][2],
         }
     }).collect_vec();
     let lines = hails.iter().map(hail_to_line).collect_vec();
@@ -67,6 +68,7 @@ pub fn exec_day24_part1(input: &str) -> String {
     result.to_string()
 }
 
-pub fn exec_day24_part2(input: &str) -> String {
-    todo!("{}", input.len())
+pub fn exec_day24_part2(_: &str) -> String {
+    //https://matrixcalc.org/slu.html#solve-using-Gaussian-elimination%28%7B%7B1,0,0,u,0,0,0,0,0,260346828765750+u*64%7D,%7B0,1,0,0,u,0,0,0,0,357833641339849+u*%28-114%29%7D,%7B0,0,1,0,0,u,0,0,0,229809969824403+u*106%7D,%7B1,0,0,v,0,0,0,0,0,340220726383465+v*%28-79%29%7D,%7B0,1,0,0,v,0,0,0,0,393110064924024+v*%28-61%29%7D,%7B0,0,1,0,0,v,0,0,0,226146987100003+v*158%7D,%7B1,0,0,t,0,0,0,0,0,11361697274707+t*328%7D,%7B0,1,0,0,t,0,0,0,0,101596061919750+t*162%7D,%7B0,0,1,0,0,t,0,0,0,46099495948720+t*333%7D%7D%29
+    "".to_string()
 }
