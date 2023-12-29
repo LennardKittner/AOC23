@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::ops::Range;
 use itertools::Itertools;
 use regex::Regex;
+use crate::days::day19::Comparison::{Greater, GreaterOrEqual, Less, LessOrEqual};
 
 #[derive(Debug)]
 struct Part {
@@ -15,6 +16,25 @@ struct Part {
 struct Rule {
     branches: Vec<Branch>,
     default: String,
+}
+
+#[derive(Debug)]
+enum Comparison {
+    Greater,
+    Less,
+    GreaterOrEqual,
+    LessOrEqual,
+}
+
+impl Comparison {
+    fn neg(&self) -> Self {
+       match self {
+           Greater => LessOrEqual,
+           Less => GreaterOrEqual,
+           GreaterOrEqual => Less,
+           LessOrEqual => Greater
+       }
+    }
 }
 
 impl Rule {
@@ -46,8 +66,16 @@ struct Branch {
 }
 
 #[derive(Debug)]
+struct Branch2 {
+    parameter: u8,
+    comparison: Comparison,
+    constant: i64,
+    target: String,
+}
+
+#[derive(Debug)]
 struct Rule2 {
-    branches: Vec<Branch>,
+    branches: Vec<Branch2>,
     default: String,
 }
 
@@ -109,66 +137,65 @@ struct Part2 {
     state: String,
 }
 
-fn new_range(range: &Range<i64>, val: i64, greater: bool) -> Option<Range<i64>> {
-    if greater && range.end > val+1 {
-        Some(range.start.max(val+1)..range.end)
-    } else if !greater && range.start < val {
-        Some(range.start..range.end.min(val))
-    } else {
-        None
+fn new_range(range: &Range<i64>, val: i64, comparison: &Comparison) -> Option<Range<i64>> {
+    match comparison {
+        Greater if range.end > val+1 => Some(range.start.max(val+1)..range.end),
+        Less if range.start < val => Some(range.start..range.end.min(val)),
+        GreaterOrEqual if range.end > val => Some(range.start.max(val)..range.end),
+        LessOrEqual if range.start <= val => Some(range.start..range.end.min(val+1)),
+        _ => None
     }
 }
-
 
 impl Rule2 {
     fn apply(&self, part: &Part2) -> Vec<Part2> {
         let mut result = Vec::new();
-        let mut default = part.clone();
-        default.state = self.default.to_string();
+        let mut curr_false = part.clone();
         for branch in &self.branches {
-            if branch.target == "R" {
-                continue;
-            }
-            let mut curr = part.clone();
+            let mut curr_true = curr_false.clone();
+            curr_false = curr_false.clone();
             match &branch.parameter {
                 b'x' => {
-                    if let Some(r) = new_range(&curr.x, branch.constant, branch.greater) {
-                        curr.x = r;
+                    if let Some(r) = new_range(&curr_true.x, branch.constant, &branch.comparison) {
+                        curr_true.x = r;
                     }
-                    if let Some(r) = new_range(&default.x, branch.constant, !branch.greater) {
-                        default.x = r;
+                    if let Some(r) = new_range(&curr_false.x, branch.constant, &branch.comparison.neg()) {
+                        curr_false.x = r;
                     }
                 },
                 b'm' => {
-                    if let Some(r) = new_range(&curr.m, branch.constant, branch.greater) {
-                        curr.m = r;
+                    if let Some(r) = new_range(&curr_true.m, branch.constant, &branch.comparison) {
+                        curr_true.m = r;
                     }
-                    if let Some(r) = new_range(&default.m, branch.constant, !branch.greater) {
-                        default.m = r;
+                    if let Some(r) = new_range(&curr_false.m, branch.constant, &branch.comparison.neg()) {
+                        curr_false.m = r;
                     }
                 },
                 b'a' => {
-                    if let Some(r) = new_range(&curr.a, branch.constant, branch.greater) {
-                        curr.a = r;
+                    if let Some(r) = new_range(&curr_true.a, branch.constant, &branch.comparison) {
+                        curr_true.a = r;
                     }
-                    if let Some(r) = new_range(&default.a, branch.constant, !branch.greater) {
-                        default.a = r;
+                    if let Some(r) = new_range(&curr_false.a, branch.constant, &branch.comparison.neg()) {
+                        curr_false.a = r;
                     }
                 },
                 b's' => {
-                    if let Some(r) = new_range(&curr.s, branch.constant, branch.greater) {
-                        curr.s = r;
+                    if let Some(r) = new_range(&curr_true.s, branch.constant, &branch.comparison) {
+                        curr_true.s = r;
                     }
-                    if let Some(r) = new_range(&default.s, branch.constant, !branch.greater) {
-                        default.s = r;
+                    if let Some(r) = new_range(&curr_false.s, branch.constant, &branch.comparison.neg()) {
+                        curr_false.s = r;
                     }
                 },
                 _ => panic!("how"),
             };
-            curr.state = branch.target.to_string();
-            result.push(curr);
+            if branch.target != "R" {
+                curr_true.state = branch.target.to_string();
+                result.push(curr_true);
+            }
         }
-        result.push(default);
+        curr_false.state = self.default.clone();
+        result.push(curr_false);
         result
     }
 }
@@ -182,9 +209,9 @@ pub fn exec_day19_part2(input: &str) -> String {
         let cap = regex_rule_outer.captures(rule).unwrap();
         let cap2 = regex_branch.captures_iter(cap.get(2).unwrap().as_str());
         let branches = cap2.map(|m| {
-            Branch {
+            Branch2 {
                 parameter: m.get(1).unwrap().as_str().as_bytes()[0],
-                greater: m.get(2).unwrap().as_str() == ">",
+                comparison: if m.get(2).unwrap().as_str() == ">" { Greater } else { Less } ,
                 constant: m.get(3).unwrap().as_str().parse().unwrap(),
                 target: m.get(4).unwrap().as_str().to_string(),
             }
@@ -199,13 +226,12 @@ pub fn exec_day19_part2(input: &str) -> String {
         state: "in".to_string(),
     }];
 
-    let mut accapted = Vec::new();
-
+    let mut accepted = Vec::new();
     while let Some(curr) = processing.pop() {
         let next_parts = rules[&curr.state].apply(&curr);
         for part in next_parts {
             if part.state == "A" {
-                accapted.push(part);
+                accepted.push(part);
             } else if part.state == "R" {
                 continue;
             } else {
@@ -213,7 +239,5 @@ pub fn exec_day19_part2(input: &str) -> String {
             }
         }
     }
-    println!("{:?}", accapted);
-
-    accapted.iter().fold(0, |acc,p| acc + p.x.clone().count() * p.m.clone().count() * p.a.clone().count() * p.s.clone().count()).to_string()
+    accepted.iter().fold(0, |acc, p| acc + p.x.clone().count() * p.m.clone().count() * p.a.clone().count() * p.s.clone().count()).to_string()
 }
