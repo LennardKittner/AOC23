@@ -1,11 +1,10 @@
 use std::collections::{HashMap, HashSet};
+use std::collections::hash_map::Entry::Vacant;
 use itertools::Itertools;
 
 pub fn exec_day23_part1(input: &str) -> String {
     let (grid, start, end) = parse(input);
-    let mut cache: HashMap<(usize, (usize, usize)), u64> = HashMap::new();
-    let mut max = 0;
-    longest_path(&mut max, true, &grid, &HashSet::new(), start, end, &mut cache).unwrap().to_string()
+    longest_path(&grid, &HashSet::new(), start, end).unwrap().to_string()
 }
 
 fn parse(input: &str) -> (Vec<&[u8]>, (usize, usize), (usize, usize)) {
@@ -27,61 +26,44 @@ fn parse(input: &str) -> (Vec<&[u8]>, (usize, usize), (usize, usize)) {
     (grid, start, end)
 }
 
-fn longest_path(max: &mut u64, part1: bool, grid: &[&[u8]], visited: &HashSet<(usize, usize)>, start: (usize, usize), end: (usize, usize), cache: &mut HashMap<(usize, (usize, usize)), u64>) -> Option<u64> {
+fn longest_path(grid: &[&[u8]], visited: &HashSet<(usize, usize)>, start: (usize, usize), end: (usize, usize)) -> Option<u64> {
     if start == end {
-        // println!("{}", visited.len());
-        // let mut grid = grid.to_vec().iter().map(|line| line.to_vec()).collect_vec();
-        // for (x, y) in visited {
-        //     grid[*y][*x] = b'O';
-        // }
-        // println!("{}", grid.iter().map(|line| line.iter().map(|c| *c as char).join("")).join("\n"));
-        if visited.len() as u64 > *max {
-            *max = visited.len() as u64;
-        }
         return Some(visited.len() as u64)
     }
-    let mut paths = Vec::new();
-    paths.push(check_point(max, part1, grid, visited, end, (start.0 as i64 -1, start.1 as i64 ), if part1 { b'>' } else { b'#' }, cache).unwrap_or(0));
-    paths.push(check_point(max, part1, grid, visited, end, (start.0 as i64 +1, start.1 as i64 ), if part1 { b'<' } else { b'#' }, cache).unwrap_or(0));
-    paths.push(check_point(max, part1, grid, visited, end, (start.0 as i64 , start.1 as i64 -1), if part1 { b'v' } else { b'#' }, cache).unwrap_or(0));
-    paths.push(check_point(max, part1, grid, visited, end, (start.0 as i64 , start.1 as i64 +1), b'#', cache).unwrap_or(0));
-    if let Some(max) = paths.iter().max() {
-        cache.insert((visited.len(), start), *max);
-        Some(*max)
-    } else {
-        None
-    }
+    [
+        check_point(grid, visited, end, (start.0 as i64 -1, start.1 as i64 ), b'>').unwrap_or(0),
+        check_point(grid, visited, end, (start.0 as i64 +1, start.1 as i64 ), b'<').unwrap_or(0),
+        check_point(grid, visited, end, (start.0 as i64 , start.1 as i64 -1), b'v').unwrap_or(0),
+        check_point(grid, visited, end, (start.0 as i64 , start.1 as i64 +1), b'#').unwrap_or(0)
+    ].iter().max().copied()
 }
 
-fn check_point(max: &mut u64, part1: bool, grid: &[&[u8]], visited: &HashSet<(usize, usize)>, end: (usize, usize), point: (i64, i64), forbidden: u8, cache: &mut HashMap<(usize, (usize, usize)), u64>) -> Option<u64> {
+fn check_point(grid: &[&[u8]], visited: &HashSet<(usize, usize)>, end: (usize, usize), point: (i64, i64), forbidden: u8) -> Option<u64> {
     if point.0 < 0 || point.1 < 0 {
         return None;
     }
     let point = (point.0 as usize, point.1 as usize);
-    if let Some(len) = cache.get(&(visited.len(), point)) {
-        return Some(*len);
-    }
     if let Some(tmp) = grid.get(point.1) {
         if let Some(next) = tmp.get(point.0) {
             if !visited.contains(&point) && *next != b'#' && *next != forbidden {
                 let mut visited = visited.clone();
                 let mut point = point;
-                if part1 {
-                    visited.insert(point);
-                    point = match next {
-                        b'v' => (point.0, point.1 + 1),
-                        b'<' => (point.0 - 1, point.1),
-                        b'>' => (point.0 + 1, point.1),
-                        _ => point,
-                    };
-                }
                 visited.insert(point);
-                return longest_path(max, part1, grid, &visited, point, end, cache);
+                point = match next {
+                    b'v' => (point.0, point.1 + 1),
+                    b'<' => (point.0 - 1, point.1),
+                    b'>' => (point.0 + 1, point.1),
+                    _ => point,
+                };
+                visited.insert(point);
+                return longest_path(grid, &visited, point, end);
             }
         }
     }
     None
 }
+
+type Graph = HashMap<(usize, usize), Vec<((usize, usize), u64)>>;
 
 pub fn exec_day23_part2(input: &str) -> String {
     let (grid, start, end) = parse(input);
@@ -92,7 +74,7 @@ pub fn exec_day23_part2(input: &str) -> String {
     a.0.to_string()
 }
 
-fn longest_path2(graph: &HashMap<(usize, usize), Vec<((usize, usize), u64)>>, start: &(usize, usize), end: &(usize, usize), curr_len: u64) -> (u64, Vec<(usize, usize)>) {
+fn longest_path2(graph: &Graph, start: &(usize, usize), end: &(usize, usize), curr_len: u64) -> (u64, Vec<(usize, usize)>) {
     if start == end {
         return (curr_len, Vec::new());
     }
@@ -111,7 +93,7 @@ fn longest_path2(graph: &HashMap<(usize, usize), Vec<((usize, usize), u64)>>, st
     (result.0, tmp)
 }
 
-fn shrink_graph(grid: &[&[u8]], start: &(usize, usize), end: &(usize, usize)) -> HashMap<(usize, usize), Vec<((usize, usize), u64)>> {
+fn shrink_graph(grid: &[&[u8]], start: &(usize, usize), end: &(usize, usize)) -> Graph {
     let mut shrink_graph = HashMap::new();
     shrink_graph.insert(*start, Vec::new());
     shrink_graph.insert(*end, Vec::new());
@@ -128,15 +110,15 @@ fn shrink_graph(grid: &[&[u8]], start: &(usize, usize), end: &(usize, usize)) ->
     shrink_graph
 }
 
-fn update(grid: &[&[u8]], end: &(usize, usize), shrink_graph: &mut HashMap<(usize, usize), Vec<((usize, usize), u64)>>, mut visited: &mut HashSet<(usize, usize)>, check_next: &mut Vec<(usize, usize)>, node: &(usize, usize), point: &(usize, usize)) {
-    if let Some(next) = explore(grid, &mut visited, point, end, node) {
-        if shrink_graph.contains_key(&next.0) {
-            shrink_graph.get_mut(&next.0).unwrap().push((*node, next.1));
-        } else {
+fn update(grid: &[&[u8]], end: &(usize, usize), shrink_graph: &mut Graph, visited: &mut HashSet<(usize, usize)>, check_next: &mut Vec<(usize, usize)>, node: &(usize, usize), point: &(usize, usize)) {
+    if let Some(next) = explore(grid, visited, point, end, node) {
+        if let Vacant(e) = shrink_graph.entry(next.0) {
             check_next.push(next.0);
-            shrink_graph.insert(next.0, vec![(*node, next.1)]);
+            e.insert(vec![(*node, next.1)]);
+        } else {
+            shrink_graph.get_mut(&next.0).unwrap().push((*node, next.1));
         }
-        shrink_graph.get_mut(&node).unwrap().push(next);
+        shrink_graph.get_mut(node).unwrap().push(next);
     }
 }
 
@@ -166,12 +148,12 @@ fn is_crossing(grid: &[&[u8]], point: &(usize, usize), end: &(usize, usize)) -> 
     if point == end {
         return true;
     }
-    let mut neighbors = Vec::new();
-    neighbors.push(get(grid, &(point.0.checked_sub(1).unwrap_or(usize::MAX), point.1)));
-    neighbors.push(get(grid, &(point.0+1, point.1)));
-    neighbors.push(get(grid, &(point.0, point.1.checked_sub(1).unwrap_or(usize::MAX))));
-    neighbors.push(get(grid, &(point.0, point.1+1)));
-    neighbors.iter().filter(|c| **c == b'#').count() < 2
+    [
+        get(grid, &(point.0.checked_sub(1).unwrap_or(usize::MAX), point.1)),
+        get(grid, &(point.0+1, point.1)),
+        get(grid, &(point.0, point.1.checked_sub(1).unwrap_or(usize::MAX))),
+        get(grid, &(point.0, point.1+1)),
+    ].iter().filter(|c| **c == b'#').count() < 2
 }
 
 fn get(grid: &[&[u8]], point: &(usize, usize)) -> u8 {
