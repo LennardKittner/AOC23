@@ -54,15 +54,10 @@ fn parse(input: &str) -> (Vec<&[u8]>, (usize, usize)) {
 pub fn exec_day21_part2(input: &str) -> String {
     let (grid, start) = parse(input);
     let distances = bfs(start.0, start.1, &grid, 1000);
-    println!("total {}", distances.len());
     let even_corners = distances.values().filter(|&&v| v % 2 == 0 && v > 65).count();
-    println!("ec {}", even_corners);
     let odd_corners = distances.values().filter(|&&v| v % 2 == 1 && v > 65).count();
-    println!("oc {}", odd_corners);
     let even_total = distances.values().filter(|&&v| v % 2 == 0).count();
-    println!("et {}", even_total);
     let odd_total = distances.values().filter(|&&v| v % 2 == 1).count();
-    println!("ot {}", odd_total);
 
     let n = 202300;
     (((n+1)*(n+1)) * odd_total + (n*n) * even_total - (n+1) * odd_corners + n * even_corners).to_string()
