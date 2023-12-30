@@ -33,7 +33,7 @@ fn check_point(grid: &[&[u8]], distances: &mut HashMap<(usize, usize), i32>, nex
 
 pub fn exec_day21_part1(input: &str) -> String {
     let (grid, start) = parse(input);
-    bfs(start.0, start.1, &grid, 64).iter().filter(|(c, d)| **d % 2 == 0).count().to_string()
+    bfs(start.0, start.1, &grid, 64).values().filter(|d| **d % 2 == 0).count().to_string()
 }
 
 fn parse(input: &str) -> (Vec<&[u8]>, (usize, usize)) {
